@@ -23,6 +23,13 @@ android {
         }
     }
 
+    android {
+        compileOptions {
+            sourceCompatibility 1.8
+            targetCompatibility 1.8
+        }
+    }
+
 }
 
 dependencies {
@@ -34,4 +41,27 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+   
+    // twilio video
+    implementation "com.twilio:video-android:$twilio_video_version"
+
+    // coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+
+    // retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.google.code.gson:gson:$gson_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_logging_version"
+
+    // material design
+    implementation "com.google.android.material:material:$material_design_version"
+
+    // lifecycle
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    // dagger
+    implementation "com.google.dagger:dagger:$dagger_version"
+    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
+
 }
