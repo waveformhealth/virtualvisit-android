@@ -23,6 +23,28 @@
         app:maxImageSize="50dp"
         app:srcCompat="@drawable/ic_call_end" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/roomToggleMicrophoneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:clickable="true"
+        android:src="@drawable/ic_mic_off"
+        app:layout_constraintBottom_toBottomOf="@+id/roomDisconnectButton"
+        app:layout_constraintStart_toEndOf="@+id/roomDisconnectButton"
+        app:layout_constraintTop_toTopOf="@+id/roomDisconnectButton" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/roomToggleCameraButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:clickable="true"
+        android:src="@drawable/ic_videocam_off"
+        app:layout_constraintBottom_toBottomOf="@+id/roomDisconnectButton"
+        app:layout_constraintEnd_toStartOf="@+id/roomDisconnectButton"
+        app:layout_constraintTop_toTopOf="@+id/roomDisconnectButton" />
+
     <com.twilio.video.VideoView
         android:id="@+id/videoView"
         android:layout_width="0dp"
