@@ -14,7 +14,7 @@ interface WaveformApiService {
         @Query("room") roomId: String
     ): Call<ServiceTokenResponse>
 
-    @POST("/v1/invite/")
+    @POST("/v1/invitation/")
     fun inviteContact(
         @Header("Authorization") passcode: String,
         @Body phone: String
