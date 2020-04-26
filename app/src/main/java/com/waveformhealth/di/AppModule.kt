@@ -37,7 +37,7 @@ class AppModule {
     @Provides
     fun provideWaveformService(okHttpClient: OkHttpClient): WaveformApiService {
         return Retrofit.Builder()
-            .baseUrl("https://jsonplaceholder.typicode.com")
+            .baseUrl("http://dd4816d6.ngrok.io")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
