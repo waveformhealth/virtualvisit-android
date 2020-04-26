@@ -1,6 +1,7 @@
 package com.waveformhealth.di
 
 import com.waveformhealth.api.WaveformApiService
+import com.waveformhealth.repo.WaveformServiceRepository
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -24,6 +25,12 @@ class AppModule {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWaveformServiceRepository(waveformApiService: WaveformApiService): WaveformServiceRepository {
+        return WaveformServiceRepository(waveformApiService)
     }
 
     @Singleton
