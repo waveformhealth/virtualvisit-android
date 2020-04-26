@@ -1,21 +1,27 @@
 package com.waveformhealth.api
 
 import com.waveformhealth.model.ServiceResponseCode
+import com.waveformhealth.model.ServiceRoom
 import com.waveformhealth.model.ServiceTokenResponse
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface WaveformApiService {
 
     @GET("/v1/token/")
-    fun getTokenFromService(): Call<ServiceTokenResponse>
+    fun getTokenFromService(
+        @Query("room") roomId: String
+    ): Call<ServiceTokenResponse>
 
     @POST("/v1/invite/")
     fun inviteContact(
-        @Header("Authorization") auth: String,
-        @Header("X-Access-Token") token: String
+        @Header("Authorization") passcode: String,
+        @Body phone: String
     ): Call<ServiceResponseCode>
-    
+
+    @POST("/v1/room/")
+    fun createRoom(
+        @Header("Authorization") passcode: String
+    ): Call<ServiceRoom>
+
 }
