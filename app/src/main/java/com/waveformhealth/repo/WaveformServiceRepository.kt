@@ -13,8 +13,8 @@ class WaveformServiceRepository @Inject constructor(
     fun createRoom(passcode: String): ServiceRoom? =
         waveformApiService.createRoom(passcode).execute().body()
 
-    fun requestToken(roomId: String): ServiceTokenResponse? =
-        waveformApiService.getTokenFromService(roomId).execute().body()
+    fun requestToken(passcode: String, roomId: String): ServiceTokenResponse? =
+        waveformApiService.getTokenFromService(passcode, roomId).execute().body()
 
     fun inviteContact(passcode: String, phoneNumber: String): ServiceResponseCode? =
         waveformApiService.inviteContact(passcode, phoneNumber).execute().body()

@@ -10,6 +10,7 @@ interface WaveformApiService {
 
     @GET("/v1/token/")
     fun getTokenFromService(
+        @Header("Authorization") passcode: String,
         @Query("room") roomId: String
     ): Call<ServiceTokenResponse>
 
