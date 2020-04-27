@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var accessToken: String
+    private lateinit var roomSid: String
 
     @Inject
     lateinit var waveformServiceRepository: WaveformServiceRepository
@@ -38,9 +39,11 @@ class MainActivity : AppCompatActivity() {
 
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
-                val passCodeEncoded = Credentials.basic("3049312415:", "")
+                val passCodeEncoded = Credentials.basic("5693651332:", "")
                 val roomResponse = waveformServiceRepository.createRoom(passCodeEncoded)
                 roomResponse?.let { serviceRoom ->
+                    roomSid = serviceRoom.sid
+                    Log.i(TAG, roomSid)
                     val roomIdEncoded = Credentials.basic(serviceRoom.sid, "")
                     val tokenResponse = waveformServiceRepository.requestToken(passCodeEncoded, roomIdEncoded)
                     tokenResponse?.let { serviceTokenResponse ->
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 val bundle = Bundle()
                 bundle.putString("accessToken", accessToken)
+                bundle.putString("roomSid", roomSid)
 
                 val roomFragment = RoomFragment()
                 roomFragment.arguments = bundle
