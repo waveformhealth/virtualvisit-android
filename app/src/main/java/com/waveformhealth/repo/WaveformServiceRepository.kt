@@ -1,9 +1,7 @@
 package com.waveformhealth.repo
 
 import com.waveformhealth.api.WaveformApiService
-import com.waveformhealth.model.ServiceResponseCode
-import com.waveformhealth.model.ServiceRoom
-import com.waveformhealth.model.ServiceTokenResponse
+import com.waveformhealth.model.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +14,8 @@ class WaveformServiceRepository @Inject constructor(
     fun requestToken(passcode: String, roomId: String): ServiceTokenResponse? =
         waveformApiService.getTokenFromService(passcode, roomId).execute().body()
 
-    fun inviteContact(passcode: String, phoneNumber: String): ServiceResponseCode? =
-        waveformApiService.inviteContact(passcode, phoneNumber).execute().body()
+    fun inviteContact(passcode: String, invite: Invite) {
+        waveformApiService.inviteContact(passcode, invite).execute().body()
+    }
+
 }
