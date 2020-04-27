@@ -37,7 +37,7 @@ class AppModule {
     @Provides
     fun provideWaveformService(okHttpClient: OkHttpClient): WaveformApiService {
         return Retrofit.Builder()
-            .baseUrl("http://dd4816d6.ngrok.io")
+            .baseUrl("https://twilio-test-wf.herokuapp.com")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
