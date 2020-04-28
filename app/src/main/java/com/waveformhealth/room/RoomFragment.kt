@@ -36,6 +36,7 @@ class RoomFragment : Fragment() {
     private lateinit var accessToken: String
     private lateinit var roomSid: String
     private lateinit var participant: RemoteParticipant
+    private lateinit var cameraCapturer: CameraCapturer
 
     private var localAudioTracks = mutableListOf<LocalAudioTrack>()
     private var localVideoTracks = mutableListOf<LocalVideoTrack>()
@@ -144,7 +145,7 @@ class RoomFragment : Fragment() {
                 context?.let {
                     val localAudioTrack = LocalAudioTrack.create(it, true)
                     val localDataTrack = LocalDataTrack.create(it)
-                    val cameraCapturer = CameraCapturer(it, CameraCapturer.CameraSource.FRONT_CAMERA)
+                    cameraCapturer = CameraCapturer(it, CameraCapturer.CameraSource.FRONT_CAMERA)
                     val localVideoTrack = LocalVideoTrack.create(it, true, cameraCapturer)
 
                     localVideoTrack?.addRenderer(binding.smallVideoViewLocal as VideoRenderer)
@@ -194,6 +195,10 @@ class RoomFragment : Fragment() {
 
             binding.smallVideoViewRemote?.visibility = View.GONE
             binding.largeVideoViewLocal?.visibility = View.GONE
+        }
+
+        binding.roomSwichCamera?.setOnClickListener {
+            cameraCapturer.switchCamera()
         }
 
     }
