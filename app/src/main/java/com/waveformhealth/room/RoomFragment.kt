@@ -59,6 +59,8 @@ class RoomFragment : Fragment() {
             remoteParticipant: RemoteParticipant
         ) {
             Log.i(TAG, "onParticipantDisconnected")
+
+            largeLocalSmallRemote()
         }
 
         override fun onRecordingStarted(room: Room) {
@@ -99,6 +101,8 @@ class RoomFragment : Fragment() {
 
                     it.setListener(remoteParticipantListener())
                 }
+            } else {
+                largeLocalSmallRemote()
             }
         }
 
@@ -182,25 +186,33 @@ class RoomFragment : Fragment() {
         }
 
         binding.smallVideoViewLocal?.setOnClickListener {
-            binding.smallVideoViewLocal?.visibility = View.GONE
-            binding.largeVideoViewRemote?.visibility = View.GONE
-
-            binding.largeVideoViewLocal?.visibility = View.VISIBLE
-            binding.smallVideoViewRemote?.visibility = View.VISIBLE
+            largeLocalSmallRemote()
         }
 
         binding.smallVideoViewRemote?.setOnClickListener {
-            binding.largeVideoViewRemote?.visibility = View.VISIBLE
-            binding.smallVideoViewLocal?.visibility = View.VISIBLE
-
-            binding.smallVideoViewRemote?.visibility = View.GONE
-            binding.largeVideoViewLocal?.visibility = View.GONE
+            largeRemoteSmallLocal()
         }
 
         binding.roomSwichCamera?.setOnClickListener {
             cameraCapturer.switchCamera()
         }
 
+    }
+
+    private fun largeRemoteSmallLocal() {
+        binding.largeVideoViewRemote?.visibility = View.VISIBLE
+        binding.smallVideoViewLocal?.visibility = View.VISIBLE
+
+        binding.smallVideoViewRemote?.visibility = View.GONE
+        binding.largeVideoViewLocal?.visibility = View.GONE
+    }
+
+    private fun largeLocalSmallRemote() {
+        binding.smallVideoViewLocal?.visibility = View.GONE
+        binding.largeVideoViewRemote?.visibility = View.GONE
+
+        binding.largeVideoViewLocal?.visibility = View.VISIBLE
+        binding.smallVideoViewRemote?.visibility = View.VISIBLE
     }
 
     private fun inviteContact() {
@@ -254,6 +266,7 @@ class RoomFragment : Fragment() {
                 Log.i(TAG, "remoteParticipantListener: onVideoTrackSubscribed")
                 remoteVideoTrack.addRenderer(binding.largeVideoViewRemote as VideoRenderer)
                 remoteVideoTrack.addRenderer(binding.smallVideoViewRemote as VideoRenderer)
+                largeRemoteSmallLocal()
                 remoteVideoTracks.add(remoteVideoTrack)
             }
 
