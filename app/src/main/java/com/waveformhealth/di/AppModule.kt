@@ -1,5 +1,6 @@
 package com.waveformhealth.di
 
+import com.waveformhealth.BuildConfig
 import com.waveformhealth.api.WaveformApiService
 import com.waveformhealth.repo.WaveformServiceRepository
 import dagger.Module
@@ -37,7 +38,7 @@ class AppModule {
     @Provides
     fun provideWaveformService(okHttpClient: OkHttpClient): WaveformApiService {
         return Retrofit.Builder()
-            .baseUrl("https://twilio-test-wf.herokuapp.com")
+            .baseUrl(BuildConfig.API_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
-                val passCodeEncoded = Credentials.basic("5693651332:", "")
+                val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
                 val roomResponse = waveformServiceRepository.createRoom(passCodeEncoded)
                 roomResponse?.let { serviceRoom ->
                     roomSid = serviceRoom.sid
