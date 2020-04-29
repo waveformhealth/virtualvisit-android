@@ -179,46 +179,46 @@ class RoomFragment : Fragment() {
     }
 
     private fun initializeClickListeners() {
-        binding.roomDisconnectButton?.setOnClickListener {
+        binding.roomDisconnectButton.setOnClickListener {
             disconnectFromRoom()
         }
 
-        binding.roomToggleCameraButton?.setOnClickListener {
+        binding.roomToggleCameraButton.setOnClickListener {
             toggleCamera()
         }
 
-        binding.roomToggleMicrophoneButton?.setOnClickListener {
+        binding.roomToggleMicrophoneButton.setOnClickListener {
             toggleMic()
         }
 
-        binding.smallVideoViewLocal?.setOnClickListener {
+        binding.smallVideoViewLocal.setOnClickListener {
             largeLocalSmallRemote()
         }
 
-        binding.smallVideoViewRemote?.setOnClickListener {
+        binding.smallVideoViewRemote.setOnClickListener {
             largeRemoteSmallLocal()
         }
 
-        binding.roomSwichCamera?.setOnClickListener {
+        binding.roomSwichCamera.setOnClickListener {
             cameraCapturer.switchCamera()
         }
 
     }
 
     private fun largeRemoteSmallLocal() {
-        binding.largeVideoViewRemote?.visibility = View.VISIBLE
-        binding.smallVideoViewLocal?.visibility = View.VISIBLE
+        binding.largeVideoViewRemote.visibility = View.VISIBLE
+        binding.smallVideoViewLocal.visibility = View.VISIBLE
 
-        binding.smallVideoViewRemote?.visibility = View.GONE
-        binding.largeVideoViewLocal?.visibility = View.GONE
+        binding.smallVideoViewRemote.visibility = View.GONE
+        binding.largeVideoViewLocal.visibility = View.GONE
     }
 
     private fun largeLocalSmallRemote() {
-        binding.smallVideoViewLocal?.visibility = View.GONE
-        binding.largeVideoViewRemote?.visibility = View.GONE
+        binding.smallVideoViewLocal.visibility = View.GONE
+        binding.largeVideoViewRemote.visibility = View.GONE
 
-        binding.largeVideoViewLocal?.visibility = View.VISIBLE
-        binding.smallVideoViewRemote?.visibility = View.VISIBLE
+        binding.largeVideoViewLocal.visibility = View.VISIBLE
+        binding.smallVideoViewRemote.visibility = View.VISIBLE
     }
 
     private fun remoteParticipantListener(): RemoteParticipant.Listener {
@@ -381,7 +381,7 @@ class RoomFragment : Fragment() {
         when (localVideoTracks[0].isEnabled) {
             true -> {
                 localVideoTracks[0].enable(false)
-                binding.roomToggleCameraButton?.setImageDrawable(
+                binding.roomToggleCameraButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
                         R.drawable.ic_videocam_on,
@@ -392,7 +392,7 @@ class RoomFragment : Fragment() {
             }
             false -> {
                 localVideoTracks[0].enable(true)
-                binding.roomToggleCameraButton?.setImageDrawable(
+                binding.roomToggleCameraButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
                         R.drawable.ic_videocam_off,
@@ -408,7 +408,7 @@ class RoomFragment : Fragment() {
         when (localAudioTracks[0].isEnabled) {
             true -> {
                 localAudioTracks[0].enable(false)
-                binding.roomToggleMicrophoneButton?.setImageDrawable(
+                binding.roomToggleMicrophoneButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
                         R.drawable.ic_mic_on,
@@ -419,7 +419,7 @@ class RoomFragment : Fragment() {
             }
             false -> {
                 localAudioTracks[0].enable(true)
-                binding.roomToggleMicrophoneButton?.setImageDrawable(
+                binding.roomToggleMicrophoneButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
                         R.drawable.ic_mic_off,

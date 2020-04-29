@@ -179,13 +179,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideFragment() {
         binding.startVisitButton.visibility = View.VISIBLE
-        binding.previewCamera?.visibility = View.VISIBLE
-        binding.fragmentContainer?.visibility = View.GONE
+        binding.previewCamera.visibility = View.VISIBLE
+        binding.fragmentContainer.visibility = View.GONE
     }
 
     private fun showFragment() {
         binding.startVisitButton.visibility = View.GONE
-        binding.previewCamera?.visibility = View.GONE
-        binding.fragmentContainer?.visibility = View.VISIBLE
+        binding.previewCamera.visibility = View.GONE
+        binding.fragmentContainer.visibility = View.VISIBLE
     }
 }
