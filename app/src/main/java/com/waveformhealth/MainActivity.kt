@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var accessToken: String
     private lateinit var roomSid: String
+    private lateinit var phoneNumber: String
+
     private var localVideoTrack: LocalVideoTrack? = null
 
     @Inject
@@ -52,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         binding.startVisitButton.setOnClickListener {
             showAlertDialogButtonClicked()
         }
-        getAccessToken()
         checkPermissions(fromButton = false)
     }
 
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity() {
                     passCodeEncoded,
                     Invite(roomSid, strippedPhoneNumber)
                 )
+                checkPermissions(fromButton = true)
             }
         }
     }
@@ -81,12 +83,12 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            val phoneNumber = customLayout.inviteContactPhoneNumberEditText.text.toString()
-            if (phoneNumber.isNotEmpty()) {
-                if (android.util.Patterns.PHONE.matcher(phoneNumber).matches()) {
-                    inviteContact(phoneNumber)
+            val phoneNumberReturn = customLayout.inviteContactPhoneNumberEditText.text.toString()
+            if (phoneNumberReturn.isNotEmpty()) {
+                if (android.util.Patterns.PHONE.matcher(phoneNumberReturn).matches()) {
+                    phoneNumber = phoneNumberReturn
+                    getAccessToken()
                     dialog.dismiss()
-                    joinRoom()
                 } else {
                     customLayout.inviteContactPhoneNumberTextInput.error = "Enter a valid phone number"
                 }
@@ -120,6 +122,8 @@ class MainActivity : AppCompatActivity() {
                         token?.continuePermissionRequest()
                     }
                 }).check()
+        } else {
+            joinRoom()
         }
     }
 
@@ -135,6 +139,7 @@ class MainActivity : AppCompatActivity() {
                         waveformServiceRepository.requestToken(passCodeEncoded, roomSid)
                     tokenResponse?.let { serviceTokenResponse ->
                         accessToken = serviceTokenResponse.token
+                        inviteContact(phoneNumber)
                     }
                 }
             }
