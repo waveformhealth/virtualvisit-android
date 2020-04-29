@@ -34,38 +34,46 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var waveformServiceRepository: WaveformServiceRepository
 
+    private var granted = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         (applicationContext as WaveformHealthApp).appComp().inject(this)
 
-        checkPermissions()
+        binding.testJoinRoom.setOnClickListener {
+            joinRoom()
+        }
+
+        checkPermissions(fromButton = false)
     }
 
-    private fun checkPermissions(): Boolean {
-        var allGranted = false
-        Dexter.withContext(this)
-            .withPermissions(
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO
-            ).withListener(object : MultiplePermissionsListener {
-                override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                    report?.let {
-                        allGranted = it.areAllPermissionsGranted()
+    private fun checkPermissions(fromButton: Boolean) {
+        if (!granted) {
+            Dexter.withContext(this)
+                .withPermissions(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO
+                ).withListener(object : MultiplePermissionsListener {
+                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                        report?.let {
+                            granted = it.areAllPermissionsGranted()
+                            if (granted && fromButton) {
+                                joinRoom()
+                            }
+                        }
                     }
-                }
 
-                override fun onPermissionRationaleShouldBeShown(permissions: List<PermissionRequest>?, token: PermissionToken?) {
-                    token?.continuePermissionRequest()
-                }
-            }).check()
-        return allGranted
+                    override fun onPermissionRationaleShouldBeShown(permissions: List<PermissionRequest>?, token: PermissionToken?) {
+                        token?.continuePermissionRequest()
+                    }
+                }).check()
+        }
     }
 
-    fun joinRoom(view: View) {
+    private fun joinRoom() {
         Log.i(TAG, "join room button pressed")
-        val granted = checkPermissions()
         if (granted) {
             GlobalScope.launch {
                 withContext(Dispatchers.IO) {
@@ -94,6 +102,8 @@ class MainActivity : AppCompatActivity() {
                     toggleViews(visible = false)
                 }
             }
+        } else {
+            checkPermissions(true)
         }
     }
 
