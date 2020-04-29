@@ -82,8 +82,7 @@ class MainActivity : AppCompatActivity() {
                     roomResponse?.let { serviceRoom ->
                         roomSid = serviceRoom.sid
                         Log.i(TAG, roomSid)
-                        val roomIdEncoded = Credentials.basic(serviceRoom.sid, "")
-                        val tokenResponse = waveformServiceRepository.requestToken(passCodeEncoded, roomIdEncoded)
+                        val tokenResponse = waveformServiceRepository.requestToken(passCodeEncoded, roomSid)
                         tokenResponse?.let { serviceTokenResponse ->
                             accessToken = serviceTokenResponse.token
                         }
