@@ -96,9 +96,12 @@ class MainActivity : AppCompatActivity() {
 
                     val roomFragment = RoomFragment()
                     roomFragment.arguments = bundle
+                    roomFragment.onResult = {
+                        hideFragment()
+                    }
 
                     supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, roomFragment).commit()
-                    toggleViews(visible = false)
+                    showFragment()
                 }
             }
         } else {
@@ -106,16 +109,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun toggleViews(visible: Boolean) {
-        when (visible) {
-            true -> {
-                binding.testJoinRoom.visibility = View.VISIBLE
-                binding.fragmentContainer?.visibility = View.GONE
-            }
-            false -> {
-                binding.testJoinRoom.visibility = View.GONE
-                binding.fragmentContainer?.visibility = View.VISIBLE
-            }
-        }
+    private fun hideFragment() {
+        binding.testJoinRoom.visibility = View.VISIBLE
+        binding.fragmentContainer?.visibility = View.GONE
+    }
+
+    private fun showFragment() {
+        binding.testJoinRoom.visibility = View.GONE
+        binding.fragmentContainer?.visibility = View.VISIBLE
     }
 }

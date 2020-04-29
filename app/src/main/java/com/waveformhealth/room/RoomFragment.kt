@@ -29,6 +29,8 @@ import javax.inject.Inject
 
 class RoomFragment : Fragment() {
 
+    var onResult: (() -> Unit)? = null
+
     private var _binding: FragmentRoomBinding? = null
     private val binding get() = _binding!!
 
@@ -123,7 +125,7 @@ class RoomFragment : Fragment() {
             localDataTracks[0].release()
 
             activity?.supportFragmentManager?.popBackStack()
-            (activity as MainActivity).toggleViews(visible = true)
+            onResult?.invoke()
         }
 
         override fun onReconnecting(room: Room, twilioException: TwilioException) {
