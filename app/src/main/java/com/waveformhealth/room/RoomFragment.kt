@@ -145,6 +145,11 @@ class RoomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.smallVideoViewLocal.mirror = true
+        binding.largeVideoViewLocal.mirror = true
+        binding.smallVideoViewRemote.mirror = true
+        binding.largeVideoViewRemote.mirror = true
+
         arguments?.let { bundle ->
             bundle.getString("roomSid")?.let {
                 roomSid = it

@@ -170,6 +170,7 @@ class MainActivity : AppCompatActivity() {
         val cameraCapturer = CameraCapturer(this, CameraCapturer.CameraSource.FRONT_CAMERA)
         localVideoTrack = LocalVideoTrack.create(applicationContext, true, cameraCapturer)
         localVideoTrack?.addRenderer(binding.previewCamera as VideoRenderer)
+        binding.previewCamera.mirror = true
     }
 
     override fun onPause() {
