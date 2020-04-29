@@ -67,7 +67,6 @@ class RoomFragment : Fragment() {
             Log.i(TAG, "onParticipantDisconnected")
 
             largeLocalSmallRemote()
-            binding.roomInviteContactButton?.visibility = View.VISIBLE
         }
 
         override fun onRecordingStarted(room: Room) {
@@ -87,7 +86,6 @@ class RoomFragment : Fragment() {
 
             participant = remoteParticipant
             participant.setListener(remoteParticipantListener())
-            binding.roomInviteContactButton?.visibility = View.GONE
         }
 
         override fun onConnected(room: Room) {
@@ -108,12 +106,9 @@ class RoomFragment : Fragment() {
                     }
 
                     it.setListener(remoteParticipantListener())
-                    binding.roomInviteContactButton?.visibility = View.GONE
                 }
             } else {
                 largeLocalSmallRemote()
-                showAlertDialogButtonClicked()
-                binding.roomInviteContactButton?.visibility = View.VISIBLE
             }
         }
 
@@ -208,10 +203,6 @@ class RoomFragment : Fragment() {
             cameraCapturer.switchCamera()
         }
 
-        binding.roomInviteContactButton?.setOnClickListener {
-            showAlertDialogButtonClicked()
-        }
-
     }
 
     private fun largeRemoteSmallLocal() {
@@ -228,45 +219,6 @@ class RoomFragment : Fragment() {
 
         binding.largeVideoViewLocal?.visibility = View.VISIBLE
         binding.smallVideoViewRemote?.visibility = View.VISIBLE
-    }
-
-    private fun inviteContact(phoneNumber: String) {
-        val strippedPhoneNumber = phoneNumber.replace("-", "")
-        val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                waveFormRepository.inviteContact(
-                    passCodeEncoded,
-                    Invite(roomSid, strippedPhoneNumber)
-                )
-            }
-        }
-    }
-
-    fun showAlertDialogButtonClicked() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context!!)
-        builder.setTitle("Invite contact")
-        val customLayout = layoutInflater.inflate(R.layout.invite_contact_dialog, null)
-        builder.setView(customLayout)
-        builder.setPositiveButton("Invite") { dialog, which ->
-        }
-
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            val phoneNumber = customLayout.inviteContactPhoneNumberEditText.text.toString()
-            if (phoneNumber.isNotEmpty()) {
-                if (android.util.Patterns.PHONE.matcher(phoneNumber).matches()) {
-                    inviteContact(phoneNumber)
-                    dialog.dismiss()
-                } else {
-                    customLayout.inviteContactPhoneNumberTextInput.error = "Enter a valid phone number"
-                }
-            } else {
-                customLayout.inviteContactPhoneNumberTextInput.error = "Enter a phone number"
-            }
-        }
     }
 
     private fun remoteParticipantListener(): RemoteParticipant.Listener {

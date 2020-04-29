@@ -4,22 +4,27 @@ import android.Manifest
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.twilio.video.CameraCapturer
+import com.twilio.video.LocalVideoTrack
+import com.twilio.video.VideoRenderer
 import com.waveformhealth.databinding.ActivityMainBinding
+import com.waveformhealth.model.Invite
 import com.waveformhealth.repo.WaveformServiceRepository
 import com.waveformhealth.room.RoomFragment
+import kotlinx.android.synthetic.main.invite_contact_dialog.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Credentials
 import javax.inject.Inject
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,11 +35,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var accessToken: String
     private lateinit var roomSid: String
+    private var localVideoTrack: LocalVideoTrack? = null
 
     @Inject
     lateinit var waveformServiceRepository: WaveformServiceRepository
 
     private var granted = false
+    private var previewShowing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +49,51 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         (applicationContext as WaveformHealthApp).appComp().inject(this)
 
-        binding.testJoinRoom.setOnClickListener {
-            joinRoom()
+        binding.startVisitButton.setOnClickListener {
+            showAlertDialogButtonClicked()
+        }
+        getAccessToken()
+        checkPermissions(fromButton = false)
+    }
+
+    private fun inviteContact(phoneNumber: String) {
+        val strippedPhoneNumber = phoneNumber.replace("-", "")
+        val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                waveformServiceRepository.inviteContact(
+                    passCodeEncoded,
+                    Invite(roomSid, strippedPhoneNumber)
+                )
+            }
+        }
+    }
+
+    private fun showAlertDialogButtonClicked() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.dialogTheme)
+        builder.setTitle("Invite contact")
+        val customLayout = layoutInflater.inflate(R.layout.invite_contact_dialog, null)
+        builder.setView(customLayout)
+        builder.setPositiveButton("Invite and start Visit") { dialog, which ->
         }
 
-        checkPermissions(fromButton = false)
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val phoneNumber = customLayout.inviteContactPhoneNumberEditText.text.toString()
+            if (phoneNumber.isNotEmpty()) {
+                if (android.util.Patterns.PHONE.matcher(phoneNumber).matches()) {
+                    inviteContact(phoneNumber)
+                    dialog.dismiss()
+                    joinRoom()
+                } else {
+                    customLayout.inviteContactPhoneNumberTextInput.error = "Enter a valid phone number"
+                }
+            } else {
+                customLayout.inviteContactPhoneNumberTextInput.error = "Enter a phone number"
+            }
+        }
     }
 
     private fun checkPermissions(fromButton: Boolean) {
@@ -59,6 +106,10 @@ class MainActivity : AppCompatActivity() {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                         report?.let {
                             granted = it.areAllPermissionsGranted()
+                            if (!previewShowing) {
+                                setUpPreviewCamera()
+                                previewShowing = false
+                            }
                             if (granted && fromButton) {
                                 joinRoom()
                             }
@@ -72,23 +123,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getAccessToken() {
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
+                val roomResponse = waveformServiceRepository.createRoom(passCodeEncoded)
+                roomResponse?.let { serviceRoom ->
+                    roomSid = serviceRoom.sid
+                    Log.i(TAG, roomSid)
+                    val tokenResponse =
+                        waveformServiceRepository.requestToken(passCodeEncoded, roomSid)
+                    tokenResponse?.let { serviceTokenResponse ->
+                        accessToken = serviceTokenResponse.token
+                    }
+                }
+            }
+        }
+    }
+
     private fun joinRoom() {
         Log.i(TAG, "join room button pressed")
         if (granted) {
             GlobalScope.launch {
-                withContext(Dispatchers.IO) {
-                    val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
-                    val roomResponse = waveformServiceRepository.createRoom(passCodeEncoded)
-                    roomResponse?.let { serviceRoom ->
-                        roomSid = serviceRoom.sid
-                        Log.i(TAG, roomSid)
-                        val tokenResponse = waveformServiceRepository.requestToken(passCodeEncoded, roomSid)
-                        tokenResponse?.let { serviceTokenResponse ->
-                            accessToken = serviceTokenResponse.token
-                        }
-                    }
-                }
-
                 withContext(Dispatchers.Main) {
                     val bundle = Bundle()
                     bundle.putString("accessToken", accessToken)
@@ -98,6 +154,7 @@ class MainActivity : AppCompatActivity() {
                     roomFragment.arguments = bundle
                     roomFragment.onResult = {
                         hideFragment()
+                        setUpPreviewCamera()
                     }
 
                     supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, roomFragment).commit()
@@ -109,13 +166,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setUpPreviewCamera() {
+        val cameraCapturer = CameraCapturer(this, CameraCapturer.CameraSource.FRONT_CAMERA)
+        localVideoTrack = LocalVideoTrack.create(applicationContext, true, cameraCapturer)
+        localVideoTrack?.addRenderer(binding.previewCamera as VideoRenderer)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        localVideoTrack?.release()
+    }
+
     private fun hideFragment() {
-        binding.testJoinRoom.visibility = View.VISIBLE
+        binding.startVisitButton.visibility = View.VISIBLE
+        binding.previewCamera?.visibility = View.VISIBLE
         binding.fragmentContainer?.visibility = View.GONE
     }
 
     private fun showFragment() {
-        binding.testJoinRoom.visibility = View.GONE
+        binding.startVisitButton.visibility = View.GONE
+        binding.previewCamera?.visibility = View.GONE
         binding.fragmentContainer?.visibility = View.VISIBLE
     }
 }
