@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         val dialog: AlertDialog = builder.create()
         dialog.show()
 
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.colorPrimary))
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val phoneNumberReturn = customLayout.inviteContactPhoneNumberEditText.text.toString()
             if (phoneNumberReturn.isNotEmpty()) {
