@@ -66,7 +66,9 @@ class RoomFragment : Fragment() {
         ) {
             Log.i(TAG, "onParticipantDisconnected")
 
-            largeLocalSmallRemote()
+            if (room.remoteParticipants.size == 0) {
+                largeLocalSmallRemote()
+            }
         }
 
         override fun onRecordingStarted(room: Room) {
