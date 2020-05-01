@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                 if (android.util.Patterns.PHONE.matcher(phoneNumberReturn).matches()) {
                     phoneNumber = phoneNumberReturn
                     getAccessToken()
+                    binding.joiningRoomProgressCircle.visibility = View.VISIBLE
                     dialog.dismiss()
                 } else {
                     customLayout.inviteContactPhoneNumberTextInput.error = "Enter a valid phone number"
@@ -163,6 +164,7 @@ class MainActivity : AppCompatActivity() {
                         setUpPreviewCamera()
                     }
 
+                    binding.joiningRoomProgressCircle.visibility = View.GONE
                     supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, roomFragment).commit()
                     showFragment()
                 }
