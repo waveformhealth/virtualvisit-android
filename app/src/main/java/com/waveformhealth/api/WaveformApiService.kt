@@ -6,21 +6,17 @@ import retrofit2.http.*
 
 interface WaveformApiService {
 
-    @GET("/v1/token/")
+    @GET("/token")
     fun getTokenFromService(
-        @Header("Authorization") passcode: String,
         @Query("room") roomId: String
     ): Call<ServiceTokenResponse>
 
-    @POST("/v1/invitation/")
+    @POST("/invitation")
     fun inviteContact(
-        @Header("Authorization") passcode: String,
         @Body invite: Invite
     ): Call<Void>
 
-    @POST("/v1/room/")
-    fun createRoom(
-        @Header("Authorization") passcode: String
-    ): Call<ServiceRoom>
+    @POST("/room")
+    fun createRoom(): Call<ServiceRoom>
 
 }

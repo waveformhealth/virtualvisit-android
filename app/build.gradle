@@ -6,11 +6,10 @@ apply plugin: 'kotlin-kapt'
 Properties localProperties = new Properties()
 localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
 
-def apiUrl, apiSecret
+def apiUrl
 
 task(configureApp) {
     apiUrl = localProperties.get("app.api.url")
-    apiSecret = localProperties.get("app.api.secret")
 }
 
 android {
@@ -30,7 +29,6 @@ android {
     buildTypes {
         all {
             buildConfigField "String", "API_URL", "$apiUrl"
-            buildConfigField "String", "API_SECRET", "$apiSecret"
         }
 
         release {

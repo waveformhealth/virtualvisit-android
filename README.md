@@ -7,7 +7,7 @@ This project was created during the [Twilio x DEV community hackathon](https://d
 
 ### How it works
 
-This android application communicates with the [Virtual Visit](https://github.com/waveformhealth/virtualvisit-server) server to
+This android application communicates with the [Virtual Visit service](https://virtualvisit-twilio-serverless-1113-dev.twil.io/room) to
 allow a patient to easily connect with a friend or family member for a Virtual Visit (video call).
 
 
@@ -50,7 +50,6 @@ Add your API URL and secret to the `local.properties` file:
 
 ```plaintext
 app.api.url="https://example.com"
-app.api.secret="00000000"
 ```
 
 

@@ -59,11 +59,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun inviteContact(phoneNumber: String) {
         val strippedPhoneNumber = phoneNumber.replace("-", "")
-        val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
                 waveformServiceRepository.inviteContact(
-                    passCodeEncoded,
                     Invite(roomSid, strippedPhoneNumber)
                 )
                 checkPermissions(fromButton = true)
@@ -132,13 +130,12 @@ class MainActivity : AppCompatActivity() {
     private fun getAccessToken() {
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
-                val passCodeEncoded = Credentials.basic(BuildConfig.API_SECRET, "")
-                val roomResponse = waveformServiceRepository.createRoom(passCodeEncoded)
+                val roomResponse = waveformServiceRepository.createRoom()
                 roomResponse?.let { serviceRoom ->
                     roomSid = serviceRoom.sid
                     Log.i(TAG, roomSid)
                     val tokenResponse =
-                        waveformServiceRepository.requestToken(passCodeEncoded, roomSid)
+                        waveformServiceRepository.requestToken(roomSid)
                     tokenResponse?.let { serviceTokenResponse ->
                         accessToken = serviceTokenResponse.token
                         inviteContact(phoneNumber)
