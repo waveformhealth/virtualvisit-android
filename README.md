@@ -39,20 +39,19 @@ These are required to join a Virtual Visit, but the camera and microphone can be
 
 - A Twilio account - [sign up](https://www.twilio.com/try-twilio)
 - Twilio api key
+- Running instance of [virtualvisit-twilio-serverless](https://github.com/waveformhealth/virtualvisit-twilio-serverless)
 
-## Building
+### Environment Variables
 
-Add the api values to the `local.properties` file and run the build, no extra setup needed for the app.
-
-### API values
-
-Add your API URL and secret to the `local.properties` file:
+Create a `local.properties` file at the root of the project and set `app.api.url` to the base URL of a running instance of [virtualvisit-twilio-serverless](https://github.com/waveformhealth/virtualvisit-twilio-serverless):
 
 ```plaintext
-app.api.url="https://example.com"
+app.api.url="https://mysite-123-dev.twil.io"
 ```
 
+### Building and Installing
 
+Use Android Studio to build and install the application or run gradle from the command line:
 
-
-
+    $ ./gradlew build
+    $ ./gradlew installDebug
