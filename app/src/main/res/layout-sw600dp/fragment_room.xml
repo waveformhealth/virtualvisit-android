@@ -60,19 +60,34 @@
         app:srcCompat="@drawable/ic_switch_camera" />
 
     <com.twilio.video.VideoView
-        android:id="@+id/largeVideoViewRemote"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.twilio.video.VideoView
         android:id="@+id/smallVideoViewLocal"
         android:layout_width="150dp"
         android:layout_height="200dp"
+        android:elevation="100dp"
         android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
+
+    <com.twilio.video.VideoView
+        android:id="@+id/largeVideoViewRemote"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:elevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:visibility="visible" />
+
+    <com.twilio.video.VideoView
+        android:id="@+id/smallVideoViewRemote"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:elevation="100dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -80,18 +95,11 @@
         android:id="@+id/largeVideoViewLocal"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:elevation="0dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <com.twilio.video.VideoView
-        android:id="@+id/smallVideoViewRemote"
-        android:layout_width="150dp"
-        android:layout_height="200dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
