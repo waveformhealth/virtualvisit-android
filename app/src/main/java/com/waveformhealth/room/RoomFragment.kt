@@ -391,7 +391,7 @@ class RoomFragment : Fragment() {
                 binding.roomToggleCameraButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
-                        R.drawable.ic_videocam_on,
+                        R.drawable.ic_videocam_off,
                         null
                     )
                 )
@@ -402,7 +402,7 @@ class RoomFragment : Fragment() {
                 binding.roomToggleCameraButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
-                        R.drawable.ic_videocam_off,
+                        R.drawable.ic_videocam_on,
                         null
                     )
                 )
@@ -418,7 +418,7 @@ class RoomFragment : Fragment() {
                 binding.roomToggleMicrophoneButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
-                        R.drawable.ic_mic_on,
+                        R.drawable.ic_mic_off,
                         null
                     )
                 )
@@ -429,7 +429,7 @@ class RoomFragment : Fragment() {
                 binding.roomToggleMicrophoneButton.setImageDrawable(
                     ResourcesCompat.getDrawable(
                         resources,
-                        R.drawable.ic_mic_off,
+                        R.drawable.ic_mic_on,
                         null
                     )
                 )
