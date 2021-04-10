@@ -7,24 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.twilio.video.*
-import com.waveformhealth.BuildConfig
-import com.waveformhealth.MainActivity
 import com.waveformhealth.R
 import com.waveformhealth.WaveformHealthApp
 import com.waveformhealth.databinding.FragmentRoomBinding
-import com.waveformhealth.model.Invite
 import com.waveformhealth.repo.WaveformServiceRepository
-import kotlinx.android.synthetic.main.invite_contact_dialog.*
-import kotlinx.android.synthetic.main.invite_contact_dialog.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.Credentials
 import javax.inject.Inject
 
 class RoomFragment : Fragment() {
@@ -139,7 +128,7 @@ class RoomFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRoomBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -171,14 +160,15 @@ class RoomFragment : Fragment() {
                     localAudioTracks.add(localAudioTrack!!)
                     localVideoTracks.add(localVideoTrack!!)
                     localDataTracks.add(localDataTrack!!)
-                }
 
-                val connectOptions = ConnectOptions.Builder(accessToken)
-                    .audioTracks(localAudioTracks)
-                    .videoTracks(localVideoTracks)
-                    .dataTracks(localDataTracks)
-                    .build()
-                room = Video.connect(context!!, connectOptions, roomListener)
+                    val connectOptions = ConnectOptions.Builder(accessToken)
+                        .audioTracks(localAudioTracks)
+                        .videoTracks(localVideoTracks)
+                        .dataTracks(localDataTracks)
+                        .build()
+
+                    room = Video.connect(it, connectOptions, roomListener)
+                }
             }
         }
 
