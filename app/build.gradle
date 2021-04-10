@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId "com.waveformhealth"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 30
         versionName androidGitVersion.name()
         versionCode androidGitVersion.code()
@@ -89,8 +89,5 @@ dependencies {
     // dagger
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
-
-    // dexter (permissions)
-    implementation 'com.karumi:dexter:6.1.0'
 
 }

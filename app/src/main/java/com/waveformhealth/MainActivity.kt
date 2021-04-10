@@ -2,17 +2,15 @@ package com.waveformhealth
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.MultiplePermissionsReport
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import androidx.core.content.ContextCompat
 import com.twilio.video.Camera2Capturer
 import com.twilio.video.LocalVideoTrack
 import com.twilio.video.VideoDimensions
@@ -46,7 +44,6 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var waveformServiceRepository: WaveformServiceRepository
 
-    private var granted = false
     private var previewShowing = false
 
     private val cameraIds = arrayListOf<String>()
@@ -60,52 +57,178 @@ class MainActivity : AppCompatActivity() {
         (applicationContext as WaveformHealthApp).appComp().inject(this)
 
         binding.startVisitButton.setOnClickListener {
-            showAlertDialogButtonClicked()
+            if (checkPermissionsGranted()) {
+                if (!previewShowing) {
+                    setUpPreviewCamera()
+                }
+                showAlertDialogButtonClicked()
+            } else {
+                requestPermissions(
+                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+                    Constants.PermissionRequests.CAMERA_PREVIEW_AND_DIALOG_REQUEST
+                )
+            }
         }
 
         binding.previewSwitchCamera.setOnClickListener {
-            if (cameraIds.indexOf(currentCameraId) == Constants.Camera.REAR_CAMERA) {
-                currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
-                switchCamera(currentCameraId, true)
+            if (checkPermissionsGranted()) {
+                if (!previewShowing) {
+                    setUpPreviewCamera()
+                }
+                switchCamera()
             } else {
-                currentCameraId = cameraIds[Constants.Camera.REAR_CAMERA]
-                switchCamera(currentCameraId, false)
+                requestPermissions(
+                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+                    Constants.PermissionRequests.CAMERA_PREVIEW_AND_SWITCH_REQUEST
+                )
             }
+        }
+
+        if (checkPermissionsGranted()) {
+            if (!previewShowing) {
+                setUpPreviewCamera()
+            }
+        } else {
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+                Constants.PermissionRequests.CAMERA_PREVIEW_REQUEST
+            )
         }
     }
 
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume")
-        checkPermissions(fromButton = false)
+        if (checkPermissionsGranted()) {
+            if (!previewShowing) {
+                setUpPreviewCamera()
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         Log.i(TAG, "onPause")
-        localVideoTrack?.release()
         if (::camera2Capturer.isInitialized) {
+            localVideoTrack?.release()
             camera2Capturer.dispose()
+            cameraIds.clear()
+            currentCameraId = ""
+            previewShowing = false
         }
-        granted = false
-        cameraIds.clear()
-        currentCameraId = ""
     }
 
-    private fun switchCamera(cameraId: String, mirror: Boolean) {
-        camera2Capturer.switchCamera(cameraId)
-        binding.previewCamera.mirror = mirror
-    }
-
-    private fun inviteContact(phoneNumber: String) {
-        val strippedPhoneNumber = phoneNumber.replace("-", "")
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                waveformServiceRepository.inviteContact(
-                    Invite(roomSid, strippedPhoneNumber)
-                )
-                checkPermissions(fromButton = true)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            Constants.PermissionRequests.CAMERA_PREVIEW_AND_DIALOG_REQUEST -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    if (!previewShowing) {
+                        setUpPreviewCamera()
+                    }
+                    showAlertDialogButtonClicked()
+                } else {
+                    checkPermissionsResult(grantResults)
+                }
+                return
             }
+
+            Constants.PermissionRequests.CAMERA_PREVIEW_AND_SWITCH_REQUEST -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    if (!previewShowing) {
+                        setUpPreviewCamera()
+                    }
+                    switchCamera()
+                } else {
+                    checkPermissionsResult(grantResults)
+                }
+                return
+            }
+
+            Constants.PermissionRequests.CAMERA_PREVIEW_REQUEST -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    if (!previewShowing) {
+                        setUpPreviewCamera()
+                    }
+                } else {
+                    checkPermissionsResult(grantResults)
+                }
+                return
+            }
+
+            else -> {
+                // Ignore all other requests.
+            }
+        }
+    }
+
+    private fun checkPermissionsGranted(): Boolean {
+        if (ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            return true
+        }
+        return false
+    }
+
+    private fun checkPermissionsResult(grantResults: IntArray) {
+        if (grantResults.isNotEmpty()) {
+            if (grantResults[0] == PackageManager.PERMISSION_DENIED &&
+                grantResults[1] == PackageManager.PERMISSION_DENIED
+            ) {
+                Toast.makeText(
+                    applicationContext,
+                    "Camera and Audio permissions required to use Virtual Visit",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                Toast.makeText(
+                    applicationContext,
+                    "Camera permission required to use Virtual Visit",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else if (grantResults[1] == PackageManager.PERMISSION_DENIED) {
+                Toast.makeText(
+                    applicationContext,
+                    "Audio permission required to use Virtual Visit",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else {
+            Toast.makeText(
+                applicationContext,
+                "Camera and Audio permissions required to use Virtual Visit",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun switchCamera() {
+        if (cameraIds.indexOf(currentCameraId) == Constants.Camera.REAR_CAMERA) {
+            currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
+            camera2Capturer.switchCamera(currentCameraId)
+            binding.previewCamera.mirror = true
+        } else {
+            currentCameraId = cameraIds[Constants.Camera.REAR_CAMERA]
+            camera2Capturer.switchCamera(currentCameraId)
+            binding.previewCamera.mirror = false
         }
     }
 
@@ -120,7 +243,8 @@ class MainActivity : AppCompatActivity() {
         val dialog: AlertDialog = builder.create()
         dialog.show()
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.colorPrimary))
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            .setTextColor(resources.getColor(R.color.colorPrimary))
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val phoneNumberReturn = customLayout.inviteContactPhoneNumberEditText.text.toString()
             if (phoneNumberReturn.isNotEmpty()) {
@@ -130,43 +254,12 @@ class MainActivity : AppCompatActivity() {
                     binding.joiningRoomProgressCircle.visibility = View.VISIBLE
                     dialog.dismiss()
                 } else {
-                    customLayout.inviteContactPhoneNumberTextInput.error = "Enter a valid phone number"
+                    customLayout.inviteContactPhoneNumberTextInput.error =
+                        "Enter a valid phone number"
                 }
             } else {
                 customLayout.inviteContactPhoneNumberTextInput.error = "Enter a phone number"
             }
-        }
-    }
-
-    private fun checkPermissions(fromButton: Boolean) {
-        if (!granted) {
-            Dexter.withContext(this)
-                .withPermissions(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO
-                ).withListener(object : MultiplePermissionsListener {
-                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                        report?.let {
-                            granted = it.areAllPermissionsGranted()
-                            if (!previewShowing) {
-                                setUpPreviewCamera()
-                                previewShowing = false
-                            }
-                            if (granted && fromButton) {
-                                joinRoom()
-                            }
-                        }
-                    }
-
-                    override fun onPermissionRationaleShouldBeShown(
-                        permissions: List<PermissionRequest>?,
-                        token: PermissionToken?
-                    ) {
-                        token?.continuePermissionRequest()
-                    }
-                }).check()
-        } else {
-            joinRoom()
         }
     }
 
@@ -188,35 +281,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun inviteContact(phoneNumber: String) {
+        val strippedPhoneNumber = phoneNumber.replace("-", "")
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                waveformServiceRepository.inviteContact(
+                    Invite(roomSid, strippedPhoneNumber)
+                )
+                joinRoom()
+            }
+        }
+    }
+
     private fun joinRoom() {
         Log.i(TAG, "join room button pressed")
-        if (granted) {
-            GlobalScope.launch {
-                withContext(Dispatchers.Main) {
-                    val bundle = Bundle()
-                    bundle.putString("accessToken", accessToken)
-                    bundle.putString("roomSid", roomSid)
+        GlobalScope.launch {
+            withContext(Dispatchers.Main) {
+                val bundle = Bundle()
+                bundle.putString("accessToken", accessToken)
+                bundle.putString("roomSid", roomSid)
 
-                    val roomFragment = RoomFragment()
-                    roomFragment.arguments = bundle
-                    roomFragment.onResult = {
-                        hideFragment()
-                        setUpPreviewCamera()
-                    }
-
-                    binding.joiningRoomProgressCircle.visibility = View.GONE
-                    supportFragmentManager.beginTransaction().replace(
-                        R.id.fragmentContainer,
-                        roomFragment
-                    ).commit()
-                    showFragment()
-                    localVideoTrack?.release()
-                    camera2Capturer.dispose()
-                    binding.previewSwitchCamera.visibility = View.GONE
+                val roomFragment = RoomFragment()
+                roomFragment.arguments = bundle
+                roomFragment.onResult = {
+                    hideFragment()
+                    setUpPreviewCamera()
                 }
+
+                binding.joiningRoomProgressCircle.visibility = View.GONE
+                supportFragmentManager.beginTransaction().replace(
+                    R.id.fragmentContainer,
+                    roomFragment
+                ).commit()
+                showFragment()
+                localVideoTrack?.release()
+                camera2Capturer.dispose()
+                binding.previewSwitchCamera.visibility = View.GONE
             }
-        } else {
-            checkPermissions(true)
         }
     }
 
@@ -229,10 +330,13 @@ class MainActivity : AppCompatActivity() {
         camera2Capturer = Camera2Capturer(applicationContext, currentCameraId)
         val videoFormat = VideoFormat(VideoDimensions.HD_S1080P_VIDEO_DIMENSIONS, 60)
 
-        localVideoTrack = LocalVideoTrack.create(applicationContext, true, camera2Capturer, videoFormat)
+        localVideoTrack =
+            LocalVideoTrack.create(applicationContext, true, camera2Capturer, videoFormat)
         localVideoTrack?.addSink(binding.previewCamera)
 
         binding.previewCamera.mirror = true
+
+        previewShowing = true
     }
 
     private fun hideFragment() {
