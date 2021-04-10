@@ -15,6 +15,7 @@ import com.waveformhealth.R
 import com.waveformhealth.WaveformHealthApp
 import com.waveformhealth.databinding.FragmentRoomBinding
 import com.waveformhealth.repo.WaveformServiceRepository
+import com.waveformhealth.util.Constants
 import javax.inject.Inject
 
 class RoomFragment : Fragment() {
@@ -26,8 +27,6 @@ class RoomFragment : Fragment() {
 
     companion object {
         const val TAG = "RoomActivityLog"
-        const val FRONT_CAMERA = 1
-        const val REAR_CAMERA = 0
     }
 
     private lateinit var room: Room
@@ -161,7 +160,7 @@ class RoomFragment : Fragment() {
                     cameraIds.addAll(
                         (it.getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList
                     )
-                    currentCameraId = cameraIds[FRONT_CAMERA]
+                    currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
 
                     cameraCapturer = Camera2Capturer(it, currentCameraId)
 
@@ -211,11 +210,11 @@ class RoomFragment : Fragment() {
         }
 
         binding.roomSwichCamera.setOnClickListener {
-            if (cameraIds.indexOf(currentCameraId) == REAR_CAMERA) {
-                currentCameraId = cameraIds[FRONT_CAMERA]
+            if (cameraIds.indexOf(currentCameraId) == Constants.Camera.REAR_CAMERA) {
+                currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
                 switchCamera(currentCameraId, true)
             } else {
-                currentCameraId = cameraIds[REAR_CAMERA]
+                currentCameraId = cameraIds[Constants.Camera.REAR_CAMERA]
                 switchCamera(currentCameraId, false)
             }
         }
