@@ -56,12 +56,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         (applicationContext as WaveformHealthApp).appComp().inject(this)
 
         binding.startVisitButton.setOnClickListener {
             showAlertDialogButtonClicked()
         }
-        checkPermissions(fromButton = false)
 
         binding.roomSwichCamera.setOnClickListener {
             if (cameraIds.indexOf(currentCameraId) == Constants.Camera.REAR_CAMERA) {
@@ -72,6 +72,18 @@ class MainActivity : AppCompatActivity() {
                 switchCamera(currentCameraId, false)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkPermissions(fromButton = false)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        localVideoTrack?.release()
+        camera2Capturer.dispose()
+        granted = false
     }
 
     private fun switchCamera(cameraId: String, mirror: Boolean) {
@@ -214,12 +226,6 @@ class MainActivity : AppCompatActivity() {
         localVideoTrack?.addSink(binding.previewCamera)
 
         binding.previewCamera.mirror = true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        localVideoTrack?.release()
-        camera2Capturer.dispose()
     }
 
     private fun hideFragment() {
