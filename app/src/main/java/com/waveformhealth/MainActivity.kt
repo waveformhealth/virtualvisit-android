@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             showAlertDialogButtonClicked()
         }
 
-        binding.roomSwichCamera.setOnClickListener {
+        binding.previewSwitchCamera.setOnClickListener {
             if (cameraIds.indexOf(currentCameraId) == Constants.Camera.REAR_CAMERA) {
                 currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
                 switchCamera(currentCameraId, true)
@@ -76,14 +76,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.i(TAG, "onResume")
         checkPermissions(fromButton = false)
     }
 
     override fun onPause() {
         super.onPause()
+        Log.i(TAG, "onPause")
         localVideoTrack?.release()
         camera2Capturer.dispose()
         granted = false
+        cameraIds.clear()
+        currentCameraId = ""
     }
 
     private fun switchCamera(cameraId: String, mirror: Boolean) {
@@ -206,6 +210,7 @@ class MainActivity : AppCompatActivity() {
                     showFragment()
                     localVideoTrack?.release()
                     camera2Capturer.dispose()
+                    binding.previewSwitchCamera.visibility = View.GONE
                 }
             }
         } else {
