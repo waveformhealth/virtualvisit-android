@@ -21,13 +21,13 @@ import com.waveformhealth.databinding.ActivityMainBinding
 import com.waveformhealth.model.Invite
 import com.waveformhealth.repo.WaveformServiceRepository
 import com.waveformhealth.room.RoomFragment
+import com.waveformhealth.util.Constants
 import kotlinx.android.synthetic.main.invite_contact_dialog.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity() {
     private var granted = false
     private var previewShowing = false
 
+    private val cameraIds = arrayListOf<String>()
+    private var currentCameraId = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -59,6 +62,21 @@ class MainActivity : AppCompatActivity() {
             showAlertDialogButtonClicked()
         }
         checkPermissions(fromButton = false)
+
+        binding.roomSwichCamera.setOnClickListener {
+            if (cameraIds.indexOf(currentCameraId) == Constants.Camera.REAR_CAMERA) {
+                currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
+                switchCamera(currentCameraId, true)
+            } else {
+                currentCameraId = cameraIds[Constants.Camera.REAR_CAMERA]
+                switchCamera(currentCameraId, false)
+            }
+        }
+    }
+
+    private fun switchCamera(cameraId: String, mirror: Boolean) {
+        camera2Capturer.switchCamera(cameraId)
+        binding.previewCamera.mirror = mirror
     }
 
     private fun inviteContact(phoneNumber: String) {
@@ -184,8 +202,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpPreviewCamera() {
-        val cameraIds = (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList
-        val currentCameraId = cameraIds[1]
+        cameraIds.addAll(
+            (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList
+        )
+        currentCameraId = cameraIds[Constants.Camera.FRONT_CAMERA]
 
         camera2Capturer = Camera2Capturer(applicationContext, currentCameraId)
         val videoFormat = VideoFormat(VideoDimensions.HD_S1080P_VIDEO_DIMENSIONS, 60)
