@@ -1,6 +1,8 @@
 package com.waveformhealth
 
 import android.Manifest
+import android.content.Context
+import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,9 +13,10 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import com.twilio.video.CameraCapturer
+import com.twilio.video.Camera2Capturer
 import com.twilio.video.LocalVideoTrack
-import com.twilio.video.VideoRenderer
+import com.twilio.video.VideoDimensions
+import com.twilio.video.VideoFormat
 import com.waveformhealth.databinding.ActivityMainBinding
 import com.waveformhealth.model.Invite
 import com.waveformhealth.repo.WaveformServiceRepository
@@ -23,8 +26,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Credentials
 import javax.inject.Inject
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var accessToken: String
     private lateinit var roomSid: String
     private lateinit var phoneNumber: String
+    private lateinit var camera2Capturer: Camera2Capturer
 
     private var localVideoTrack: LocalVideoTrack? = null
 
@@ -118,7 +122,10 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onPermissionRationaleShouldBeShown(permissions: List<PermissionRequest>?, token: PermissionToken?) {
+                    override fun onPermissionRationaleShouldBeShown(
+                        permissions: List<PermissionRequest>?,
+                        token: PermissionToken?
+                    ) {
                         token?.continuePermissionRequest()
                     }
                 }).check()
@@ -162,8 +169,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     binding.joiningRoomProgressCircle.visibility = View.GONE
-                    supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, roomFragment).commit()
+                    supportFragmentManager.beginTransaction().replace(
+                        R.id.fragmentContainer,
+                        roomFragment
+                    ).commit()
                     showFragment()
+                    localVideoTrack?.release()
+                    camera2Capturer.dispose()
                 }
             }
         } else {
@@ -172,15 +184,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpPreviewCamera() {
-        val cameraCapturer = CameraCapturer(this, CameraCapturer.CameraSource.FRONT_CAMERA)
-        localVideoTrack = LocalVideoTrack.create(applicationContext, true, cameraCapturer)
-        localVideoTrack?.addRenderer(binding.previewCamera as VideoRenderer)
+        val cameraIds = (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList
+        val currentCameraId = cameraIds[1]
+
+        camera2Capturer = Camera2Capturer(applicationContext, currentCameraId)
+        val videoFormat = VideoFormat(VideoDimensions.HD_S1080P_VIDEO_DIMENSIONS, 60)
+
+        localVideoTrack = LocalVideoTrack.create(applicationContext, true, camera2Capturer, videoFormat)
+        localVideoTrack?.addSink(binding.previewCamera)
+
         binding.previewCamera.mirror = true
     }
 
     override fun onPause() {
         super.onPause()
         localVideoTrack?.release()
+        camera2Capturer.dispose()
     }
 
     private fun hideFragment() {

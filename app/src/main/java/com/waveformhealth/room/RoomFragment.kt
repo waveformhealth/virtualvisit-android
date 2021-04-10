@@ -1,6 +1,7 @@
 package com.waveformhealth.room
 
 import android.content.Context
+import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,13 +26,15 @@ class RoomFragment : Fragment() {
 
     companion object {
         const val TAG = "RoomActivityLog"
+        const val FRONT_CAMERA = 1
+        const val REAR_CAMERA = 0
     }
 
     private lateinit var room: Room
     private lateinit var accessToken: String
     private lateinit var roomSid: String
     private lateinit var participant: RemoteParticipant
-    private lateinit var cameraCapturer: CameraCapturer
+    private lateinit var cameraCapturer: Camera2Capturer
 
     private var localAudioTracks = mutableListOf<LocalAudioTrack>()
     private var localVideoTracks = mutableListOf<LocalVideoTrack>()
@@ -40,6 +43,9 @@ class RoomFragment : Fragment() {
     private var remoteAudioTracks = mutableListOf<RemoteAudioTrack>()
     private var remoteVideoTracks = mutableListOf<RemoteVideoTrack>()
     private var remoteDataTracks = mutableListOf<RemoteDataTrack>()
+
+    private val cameraIds = arrayListOf<String>()
+    private var currentCameraId = ""
 
     @Inject
     lateinit var waveFormRepository: WaveformServiceRepository
@@ -151,11 +157,19 @@ class RoomFragment : Fragment() {
                 context?.let {
                     val localAudioTrack = LocalAudioTrack.create(it, true)
                     val localDataTrack = LocalDataTrack.create(it)
-                    cameraCapturer = CameraCapturer(it, CameraCapturer.CameraSource.FRONT_CAMERA)
-                    val localVideoTrack = LocalVideoTrack.create(it, true, cameraCapturer)
 
-                    localVideoTrack?.addRenderer(binding.smallVideoViewLocal as VideoRenderer)
-                    localVideoTrack?.addRenderer(binding.largeVideoViewLocal as VideoRenderer)
+                    cameraIds.addAll(
+                        (it.getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList
+                    )
+                    currentCameraId = cameraIds[FRONT_CAMERA]
+
+                    cameraCapturer = Camera2Capturer(it, currentCameraId)
+
+                    val videoFormat = VideoFormat(VideoDimensions.HD_S1080P_VIDEO_DIMENSIONS, 60)
+                    val localVideoTrack = LocalVideoTrack.create(it, true, cameraCapturer, videoFormat)
+
+                    localVideoTrack?.addSink(binding.smallVideoViewLocal)
+                    localVideoTrack?.addSink(binding.largeVideoViewLocal)
 
                     localAudioTracks.add(localAudioTrack!!)
                     localVideoTracks.add(localVideoTrack!!)
@@ -197,9 +211,20 @@ class RoomFragment : Fragment() {
         }
 
         binding.roomSwichCamera.setOnClickListener {
-            cameraCapturer.switchCamera()
+            if (cameraIds.indexOf(currentCameraId) == REAR_CAMERA) {
+                currentCameraId = cameraIds[FRONT_CAMERA]
+                switchCamera(currentCameraId, true)
+            } else {
+                currentCameraId = cameraIds[REAR_CAMERA]
+                switchCamera(currentCameraId, false)
+            }
         }
+    }
 
+    private fun switchCamera(cameraId: String, mirror: Boolean) {
+        cameraCapturer.switchCamera(cameraId)
+        binding.smallVideoViewLocal.mirror = mirror
+        binding.largeVideoViewLocal.mirror = mirror
     }
 
     private fun largeRemoteSmallLocal() {
@@ -255,8 +280,8 @@ class RoomFragment : Fragment() {
                 remoteVideoTrack: RemoteVideoTrack
             ) {
                 Log.i(TAG, "remoteParticipantListener: onVideoTrackSubscribed")
-                remoteVideoTrack.addRenderer(binding.largeVideoViewRemote as VideoRenderer)
-                remoteVideoTrack.addRenderer(binding.smallVideoViewRemote as VideoRenderer)
+                remoteVideoTrack.addSink(binding.largeVideoViewRemote)
+                remoteVideoTrack.addSink(binding.smallVideoViewRemote)
                 largeRemoteSmallLocal()
                 remoteVideoTracks.add(remoteVideoTrack)
             }
