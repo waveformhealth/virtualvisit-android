@@ -84,7 +84,9 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         Log.i(TAG, "onPause")
         localVideoTrack?.release()
-        camera2Capturer.dispose()
+        if (::camera2Capturer.isInitialized) {
+            camera2Capturer.dispose()
+        }
         granted = false
         cameraIds.clear()
         currentCameraId = ""
