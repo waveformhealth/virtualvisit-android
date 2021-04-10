@@ -20,7 +20,7 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.waveformhealth"
+        applicationId "com.waveformhealth.virtualvisit"
         minSdkVersion 23
         targetSdkVersion 30
         versionName androidGitVersion.name()
