@@ -63,8 +63,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 showAlertDialogButtonClicked()
             } else {
-                requestPermissions(
-                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+                requestCameraAndAudioPermissions(
                     Constants.PermissionRequests.CAMERA_PREVIEW_AND_DIALOG_REQUEST
                 )
             }
@@ -77,8 +76,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 switchCamera()
             } else {
-                requestPermissions(
-                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+                requestCameraAndAudioPermissions(
                     Constants.PermissionRequests.CAMERA_PREVIEW_AND_SWITCH_REQUEST
                 )
             }
@@ -89,8 +87,7 @@ class MainActivity : AppCompatActivity() {
                 setUpPreviewCamera()
             }
         } else {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+            requestCameraAndAudioPermissions(
                 Constants.PermissionRequests.CAMERA_PREVIEW_REQUEST
             )
         }
@@ -186,6 +183,13 @@ class MainActivity : AppCompatActivity() {
             return true
         }
         return false
+    }
+
+    private fun requestCameraAndAudioPermissions(requestCode: Int) {
+        requestPermissions(
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+            requestCode
+        )
     }
 
     private fun checkPermissionsResult(grantResults: IntArray) {
